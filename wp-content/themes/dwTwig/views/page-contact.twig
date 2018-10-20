@@ -1,0 +1,14 @@
+{% extends "base.twig" %}
+
+{% block content %}
+  <section id="contact-map" class="container">
+    <div class="acf-map">
+      <div class="marker" data-lat="{{post.get_field('map').lat}}" data-lng="{{post.get_field('map').lng}}"></div>
+    </div>
+  </section>
+  <section id="contact-form" class="container">
+		{% filter shortcodes %}
+			{{contact_form}}
+		{% endfilter %}
+	</section>
+{% endblock %}

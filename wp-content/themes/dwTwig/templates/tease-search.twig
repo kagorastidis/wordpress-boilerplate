@@ -1,0 +1,9 @@
+<article class="tease tease-{{post.post_type}} col-xs-12 no-padding" id="tease-{{post.ID}}">
+	{% block content %}
+		<h2 class="h2"><a href="{{post.link}}">{{post.title}}</a></h2>
+		<div>
+			{{post.get_content(30)}}
+			<a href="{{post.link}}">Περισσότερα...</a>
+		</div>
+	{% endblock %}
+</article>

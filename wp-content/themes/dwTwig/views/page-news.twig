@@ -1,0 +1,11 @@
+{% extends "base.twig" %}
+
+{% block content %}
+  <div class="news-megacontainer container">
+    <div>
+      {% for post in news_posts %}
+        {% include ['tease.twig'] %} 
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}

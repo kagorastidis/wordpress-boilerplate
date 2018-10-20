@@ -1,0 +1,46 @@
+{% if menu %}
+	<nav id="nav-main" class="nav-main hidden-sm hidden-xs col-md-10" role="navigation">
+		<section class="main-menu">
+			<ul class="main-nav nav nav-pills">
+				{% for item in menu.get_items %}
+					{% if item.get_children %}
+						<li class="nav-main-item dropdown root-menu-item-has-children {{item.classes | join(' ')}}"><a {% if item.target %} target="{{item.target}}" {% endif %} class="nav-main-link" href="{{item.link}}">{{item.title}}</a>
+							{% if item.get_children %}
+								<ul class="nav-drop dropdown-menu">
+									{% for child in item.get_children %}
+										{% if child.get_children %}
+											<li class="dropdown-submenu submenu-item-has-children {{child.classes | join(' ')}}"><a {% if child.target %} target="{{child.target}}" {% endif %} href="{{child.link}}">{{child.title}}</a>
+												{% if child.get_children %}
+													<ul class="nav-drop dropdown-menu-sub">
+														{% for grandchild in child.get_children %}
+															<li class="nav-drop-item {{grandchild.classes | join(' ')}}"><a {% if grandchild.target %} target="{{grandchild.target}}" {% endif %} href="{{grandchild.link}}">{{grandchild.title}}</a></li>
+														{% endfor %}
+													</ul>
+												{% endif %}
+											</li>
+										{% else %}
+											<li class="dropdown-submenu"><a {% if child.target %} target="{{child.target}}" {% endif %} href="{{child.link}}">{{child.title}}</a></li>
+										{% endif %}
+									{% endfor %}
+								</ul>
+							{% endif %}
+						</li>
+					{% else %}
+						<li class="nav-main-item dropdown {{item.classes | join(' ')}}"><a {% if item.target %} target="{{item.target}}" {% endif %} class="nav-main-link" href="{{item.link}}">{{item.title}}</a></li>
+					{% endif %}
+				{% endfor %}
+          <div class="lang-wrapper">{{langbar}}</div>
+          <form class="search search-form hidden-sm hidden-xs" action="{{site.url}}">
+            <input type="search" class="search-box search-field" id="search-box" placeholder="Αναζήτηση" name="s">
+              <label for="search-box" class="search-box-label">
+                <i class="search-icon fas fa-search"></i>
+              </label>
+              <span class="search-close">
+                <i class="search-close-icon fas fa-times"></i>
+              </span>
+            </input>
+          </form>
+			</ul>
+		</section>
+	</nav>
+{% endif %}

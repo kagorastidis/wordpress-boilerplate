@@ -1,0 +1,20 @@
+
+<ul class="pages list-inline text-center">
+    {% if pagination.prev %}
+        <li><a href="{{pagination.prev.link}}" class="btn btn-default btn-pagination {{pagination.prev.link|length ? '' : 'invisible'}}">Prev</a></li>
+    {% endif %}
+
+    {% for page in pagination.pages %}
+        <li>
+            {% if page.link %}
+                <a href="{{page.link}}" class="btn btn-default btn-pagination {{page.class}}">{{page.title}}</a>
+            {% else %}
+                <a href="{{page.link}}" class="btn btn-default btn-pagination btn-disabled {{page.class}}" disabled>{{page.title}}</a>
+            {% endif %}
+        </li>
+    {% endfor %}
+
+    {% if pagination.next %}
+        <li><a href="{{pagination.next.link}}" class="btn btn-default btn-pagination {{pagination.next.link|length ? '' : 'invisible'}}">Next</a></li>
+    {% endif %}
+</ul>

@@ -1,0 +1,14 @@
+{% extends "base.twig" %}
+
+<article class="post post-{{post.post_type}}" id="post-{{post.ID}}">
+	{% block content %}
+		<h2 class="h2">{{post.title}}</h2>
+		<p>{{post.get_preview}}</p>
+		{% if post.get_thumbnail %}
+			<img src="{{post.thumbnail.src}}" />
+		{% endif %}
+        <p class="post-content">
+            <!-- get content here -->
+        </p>
+	{% endblock %}
+</article>

@@ -1,0 +1,16 @@
+/*VARIABLES*/
+:root {
+
+    /*  colors  */
+
+  --primary-color: #2d5e94;
+  --primary-color-darken: #2d5e94;
+  --secondary-color: #e9bb99;
+  --secondary-color-darken: #e9bb99;
+  --link-color: #ababac;
+
+  /* fonts */
+
+  --primary-font: "Ubuntu", sans-serif;
+  
+}

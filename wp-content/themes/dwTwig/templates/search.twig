@@ -1,0 +1,13 @@
+{% extends "base.twig" %}
+
+{% block content %}
+	<section id="news" class="container">
+		{% if posts %}
+			{% for post in posts %}
+				{% include ['tease-search-'~post.post_type~'.twig', 'tease-search.twig'] %}
+			{% endfor %}
+		{% else %}
+			<h2 class="search-not-found col-xs-12">Δεν βρέθηκαν αποτελέσματα</h2>
+		{% endif %}
+	</section>
+{% endblock %}

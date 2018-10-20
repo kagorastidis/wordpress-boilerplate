@@ -1,0 +1,17 @@
+{% extends "base.twig" %}
+
+{% block content %}
+	{% include 'slideshow.twig' %}
+	<div class="content-wrapper container">
+		<div class="row">
+			<section id="news">
+				<h2 class="text-center section-title">Τελευταία <span class="bold">Νέα</span></h2>
+				{% for post in posts %}
+					{% include ['tease-'~post.post_type~'.twig', 'tease.twig'] %}
+				{% endfor %}
+			</section>
+		</div>
+	</div>
+{% endblock %}
+
+{# For multiligual content use getSingleContentById and getTaxonomyUrlById #}

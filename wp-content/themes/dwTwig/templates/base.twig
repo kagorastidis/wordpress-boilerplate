@@ -1,0 +1,63 @@
+{% block html_head_container %}
+
+{% include 'html-header.twig' %}
+	{% block head %}
+	{% endblock %}
+	</head>
+{% endblock %}
+
+	<body class="{{body_class}}" data-template="base.twig" data-lang="{{current_lang}}">
+		<div id="site-wrapper">
+			{% include 'menu-offcanvas.twig' %}
+				<header class="header" >
+					{% block header %}
+						<div class="container-fluid">
+							<div id="navigation" class="wrapper container">
+								<a href="#" class="toggle-nav hidden-md hidden-lg hidden-xl"><i class="fas fa-bars"></i></a>
+								<a class="logo-link col-md-2" href="{{site.url}}" rel="home">
+									<img class="img-responsive" src="{{site.theme.link}}/images/logo.png" alt="{{site.name}}">
+								</a>
+								{% include 'menu.twig' %}
+							</div>
+						</div>
+					{% endblock %}
+				</header>
+					<section id="content" role="main" class="content-wrapper">
+						{% if not isHome %}
+							<div class="breadcrumb-container container">
+								{% if post.post_title %}
+									<div class="breadcrumb-top"> <a lang="el" href="{{site.url}}">Αρχική</a> / <span lang="el">{{ post.post_title }}</span> </div>
+								{% elseif categories.name %}
+									<div class="breadcrumb-top"> <a lang="el" href="{{site.url}}">Αρχική</a> / <span lang="el">{{ term.name }}</span> </div>
+								{% else %}
+									{# If you want breadcrumbs always, do something here #}
+								{% endif %}
+							</div>
+						{% endif %}
+						<div class="wrapper {{sidebar_class}}">
+							{% block content %}
+								Sorry, no content
+							{% endblock %}
+						</div>
+						{% if sidebar %}
+							<aside class="layout-sidebar">
+								{{sidebar}}
+							</aside>
+						{% endif %}
+					</section>
+				{% if footer1 or footer2 or footer3 or footer4 or footer5 %}
+					<section id="footer-widgets" class="content-wrapper">
+						{% include 'footer-widgets.twig' %}
+					</section>
+				{% endif %}
+				{% block footer %}
+					<footer id="footer">
+						{% include 'footer.twig' %}
+					</footer>
+				{% endblock %}
+			</div>
+		</div>
+		{{ function('wp_footer') }}
+		{% include 'scripts.twig' %}
+	</body>
+</html>

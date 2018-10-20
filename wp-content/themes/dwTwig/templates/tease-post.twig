@@ -1,0 +1,12 @@
+{% extends "tease.twig" %}
+
+{% block content %}
+	<h2 class="h2"><a href="{{post.link}}">{{post.title}}</a></h2>
+		<div>
+			{{post.get_content(30)}}
+			<a href="{{post.link}}">Περισσότερα...</a>
+		</div>
+		{% if post.thumbnail.src %}
+			<img src="{{post.thumbnail.src}}" />
+		{% endif %}
+{% endblock %}
