@@ -350,6 +350,9 @@ if (!wfConfig::liveTrafficEnabled($overridden)):
 																<span data-bind="if: (statusCode() == 301 || statusCode() == 302) && !action()">
 																	was redirected when visiting
 																</span>
+																<span data-bind="if: (statusCode() == 301 || statusCode() == 302) && action()">
+																	was <span data-bind="text: firewallAction"></span> at
+																</span>
 																<span data-bind="if: ((statusCode() == 403 || statusCode() == 503) && action() != 'loginFailValidUsername' && action() != 'loginFailInvalidUsername')">
 																	was <span data-bind="text: firewallAction" style="color: #F00;"></span> at
 																</span>

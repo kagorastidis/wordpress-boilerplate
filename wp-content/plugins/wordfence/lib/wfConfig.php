@@ -11,6 +11,7 @@ class wfConfig {
 	const TYPE_DOUBLE = 'double';
 	const TYPE_STRING = 'string';
 	const TYPE_ARRAY = 'array';
+	const TYPE_JSON = 'json';
 	
 	const OPTIONS_TYPE_GLOBAL = 'global';
 	const OPTIONS_TYPE_FIREWALL = 'firewall';
@@ -106,7 +107,6 @@ class wfConfig {
 			"other_bypassLitespeedNoabort" => array('value' => false, 'autoload' => self::AUTOLOAD),
 			"deleteTablesOnDeact" => array('value' => false, 'autoload' => self::AUTOLOAD),
 			"autoUpdate" => array('value' => false, 'autoload' => self::AUTOLOAD),
-			"disableCookies" => array('value' => false, 'autoload' => self::AUTOLOAD),
 			"startScansRemotely" => array('value' => false, 'autoload' => self::AUTOLOAD),
 			"disableConfigCaching" => array('value' => false, 'autoload' => self::AUTOLOAD),
 			"addCacheComment" => array('value' => false, 'autoload' => self::AUTOLOAD),
@@ -137,7 +137,8 @@ class wfConfig {
 			'scan_exclude' => array('value' => '', 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_STRING)), 
 			'scan_maxIssues' => array('value' => 1000, 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_INT)), 
 			'scan_maxDuration' => array('value' => '', 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_STRING)), 
-			'whitelisted' => array('value' => '', 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_STRING)), 
+			'whitelisted' => array('value' => '', 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_STRING)),
+			'whitelistedServices' => array('value' => '{}', 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_JSON)),
 			'bannedURLs' => array('value' => '', 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_STRING)), 
 			'maxExecutionTime' => array('value' => 0, 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_INT)), 
 			'howGetIPs' => array('value' => '', 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_STRING)), 
@@ -163,8 +164,6 @@ class wfConfig {
 			'max404Crawlers_action' => array('value' => "throttle", 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_STRING)),
 			'max404Humans' => array('value' => 'DISABLED', 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_STRING)),
 			'max404Humans_action' => array('value' => "throttle", 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_STRING)),
-			'maxScanHits' => array('value' => 'DISABLED', 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_STRING)),
-			'maxScanHits_action' => array('value' => "throttle", 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_STRING)),
 			'blockedTime' => array('value' => 300, 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_INT)),
 			'email_summary_interval' => array('value' => 'weekly', 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_STRING)),
 			'email_summary_excluded_directories' => array('value' => 'wp-content/cache,wp-content/wflogs', 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_STRING)),
@@ -213,6 +212,8 @@ class wfConfig {
 			'needsUpgradeTour_livetraffic' => array('value' => false, 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_BOOL)),
 			'supportContent' => array('value' => '{}', 'autoload' => self::DONT_AUTOLOAD, 'validation' => array('type' => self::TYPE_STRING)),
 			'supportHash' => array('value' => '', 'autoload' => self::DONT_AUTOLOAD, 'validation' => array('type' => self::TYPE_STRING)),
+			'whitelistPresets' => array('value' => '{}', 'autoload' => self::DONT_AUTOLOAD, 'validation' => array('type' => self::TYPE_STRING)),
+			'whitelistHash' => array('value' => '', 'autoload' => self::DONT_AUTOLOAD, 'validation' => array('type' => self::TYPE_STRING)),
 			'touppPromptNeeded' => array('value' => false, 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_BOOL)),
 			'touppBypassNextCheck' => array('value' => false, 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_BOOL)),
 			'autoUpdateAttempts' => array('value' => 0, 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_INT)),
@@ -492,6 +493,9 @@ class wfConfig {
 			wfWAFIPBlocksController::setNeedsSynchronizeConfigSettings();
 		} 
 	}
+	public static function setJSON($key, $val, $autoload = self::AUTOLOAD) {
+		self::set($key, @json_encode($val), $autoload);
+	}
 	public static function get($key, $default = false, $allowCached = true) {
 		global $wpdb;
 		
@@ -516,6 +520,15 @@ class wfConfig {
 	
 	public static function getInt($key, $default = 0, $allowCached = true) {
 		return (int) self::get($key, $default, $allowCached);
+	}
+	
+	public static function getJSON($key, $default = false, $allowCached = true) {
+		$json = self::get($key, $default, $allowCached);
+		$decoded = @json_decode($json, true);
+		if ($decoded === null) {
+			return $default;
+		}
+		return $decoded;
 	}
 	
 	/**
@@ -1224,6 +1237,23 @@ Options -ExecCGI
 		return $errors;
 	}
 	
+	public static function clean($changes) {
+		$cleaned = array();
+		foreach ($changes as $key => $value) {
+			if (preg_match('/^whitelistedServices\.([a-z0-9]+)$/i', $key, $matches)) {
+				if (!isset($cleaned['whitelistedServices']) || !is_array($cleaned['whitelistedServices'])) {
+					$cleaned['whitelistedServices'] = wfConfig::getJSON('whitelistedServices', array());
+				}
+				
+				$cleaned['whitelistedServices'][$matches[1]] = wfUtils::truthyToBoolean($value);
+			}
+			else {
+				$cleaned[$key] = $value;
+			}
+		}
+		return $cleaned;
+	}
+	
 	/**
 	 * Saves the array of configuration changes in the correct place. This may currently be the wfConfig table, the WAF's config file, or both. The
 	 * validation function will handle all bounds checks and this will be limited to normalizing the values as needed.
@@ -1388,6 +1418,19 @@ Options -ExecCGI
 						wfConfig::set($key, '');
 					}
 					
+					$saved = true;
+					break;
+				}
+				case 'whitelistedServices':
+				{
+					if (is_string($value)) { //Already JSON (import/export settings)
+						wfConfig::set($key, $value);
+					}
+					else {
+						wfConfig::setJSON($key, (array) $value);
+					}
+					
+					$wafConfig->setConfig('whitelistedServiceIPs', @json_encode(wfUtils::whitelistedServiceIPs()));
 					$saved = true;
 					break;
 				}
@@ -1640,7 +1683,7 @@ Options -ExecCGI
 				$api = new wfAPI($apiKey, wfUtils::getWPVersion());
 				try {
 					$keyType = wfAPI::KEY_TYPE_FREE;
-					$keyData = $api->call('ping_api_key', array(), array('supportHash' => wfConfig::get('supportHash', '')));
+					$keyData = $api->call('ping_api_key', array(), array('supportHash' => wfConfig::get('supportHash', ''), 'whitelistHash' => wfConfig::get('whitelistHash', '')));
 					if (isset($keyData['_isPaidKey'])) {
 						$keyType = wfConfig::get('keyType');
 					}
@@ -1651,6 +1694,10 @@ Options -ExecCGI
 					if (isset($keyData['support']) && isset($keyData['supportHash'])) {
 						wfConfig::set('supportContent', $keyData['support']);
 						wfConfig::set('supportHash', $keyData['supportHash']);
+					}
+					if (isset($keyData['_whitelist']) && isset($keyData['_whitelistHash'])) {
+						wfConfig::setJSON('whitelistPresets', $keyData['_whitelist']);
+						wfConfig::set('whitelistHash', $keyData['_whitelistHash']);
 					}
 					if (isset($keyData['scanSchedule']) && is_array($keyData['scanSchedule'])) {
 						wfConfig::set_ser('noc1ScanSchedule', $keyData['scanSchedule']);
@@ -1698,7 +1745,6 @@ Options -ExecCGI
 					'other_bypassLitespeedNoabort',
 					'deleteTablesOnDeact',
 					'autoUpdate',
-					'disableCookies',
 					'disableCodeExecutionUploads',
 					'email_summary_enabled',
 					'email_summary_dashboard_widget_enabled',
@@ -1732,6 +1778,7 @@ Options -ExecCGI
 					'wafAlertOnAttacks',
 					'disableWAFIPBlocking',
 					'whitelisted',
+					'whitelistedServices',
 					'bannedURLs',
 					'loginSec_userBlacklist',
 					'neverBlockBG',
@@ -1751,8 +1798,6 @@ Options -ExecCGI
 					'max404Crawlers_action',
 					'max404Humans',
 					'max404Humans_action',
-					'maxScanHits',
-					'maxScanHits_action',
 					'blockedTime',
 					'allowed404s',
 					'wafAlertWhitelist',
@@ -1866,7 +1911,6 @@ Options -ExecCGI
 					'other_bypassLitespeedNoabort',
 					'deleteTablesOnDeact',
 					'autoUpdate',
-					'disableCookies',
 					'disableCodeExecutionUploads',
 					'email_summary_enabled',
 					'email_summary_dashboard_widget_enabled',
@@ -1895,6 +1939,7 @@ Options -ExecCGI
 					'wafAlertOnAttacks',
 					'disableWAFIPBlocking',
 					'whitelisted',
+					'whitelistedServices',
 					'bannedURLs',
 					'loginSec_userBlacklist',
 					'neverBlockBG',
@@ -1914,8 +1959,6 @@ Options -ExecCGI
 					'max404Crawlers_action',
 					'max404Humans',
 					'max404Humans_action',
-					'maxScanHits',
-					'maxScanHits_action',
 					'blockedTime',
 					'allowed404s',
 					'wafAlertWhitelist',

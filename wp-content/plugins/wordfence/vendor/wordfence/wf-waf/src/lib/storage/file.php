@@ -1,4 +1,5 @@
 <?php
+if (defined('WFWAF_VERSION') && !defined('WFWAF_RUN_COMPLETE')) {
 
 class wfWAFStorageFile implements wfWAFStorageInterface {
 
@@ -38,7 +39,7 @@ class wfWAFStorageFile implements wfWAFStorageInterface {
 		fflush($tmpHandle);
 		self::lock($tmpHandle, LOCK_UN);
 		fclose($tmpHandle);
-		chmod($tmpFile, 0660); 
+		chmod($tmpFile, self::permissions()); 
 
 		// Attempt to verify file has finished writing (sometimes the disk will lie for better benchmarks)
 		$tmpContents = file_get_contents($tmpFile);
@@ -74,6 +75,33 @@ class wfWAFStorageFile implements wfWAFStorageInterface {
 			error_log('Lock not acquired ' . $locked);
 		}
 		return $locked;
+	}
+	
+	public static function permissions() {
+		if (defined('WFWAF_LOG_FILE_MODE')) {
+			return WFWAF_LOG_FILE_MODE;
+		}
+		
+		static $_cachedPermissions = null;
+		if ($_cachedPermissions === null) {
+			if (defined('WFWAF_LOG_PATH')) {
+				$template = rtrim(WFWAF_LOG_PATH, '/') . '/template.php';
+				if (file_exists($template)) {
+					$stat = @stat($template);
+					if ($stat !== false) {
+						$mode = $stat[2];
+						$updatedMode = 0600;
+						if (($mode & 0020) == 0020) {
+							$updatedMode = $updatedMode | 0060;
+						}
+						$_cachedPermissions = $updatedMode;
+						return $updatedMode;
+					}
+				}
+			}
+			return 0660;
+		}
+		return $_cachedPermissions;
 	}
 
 	/**
@@ -402,7 +430,7 @@ class wfWAFStorageFile implements wfWAFStorageInterface {
 		if (!file_exists($filePath)) {
 			@file_put_contents($filePath, $defaultContents, LOCK_EX);
 		}
-		@chmod($filePath, 0660);
+		@chmod($filePath, self::permissions());
 		if ($arrayKey !== false) {
 			$fileHandle[$arrayKey] = @fopen($filePath, 'r+');
 			$handle = $fileHandle[$arrayKey];
@@ -414,7 +442,7 @@ class wfWAFStorageFile implements wfWAFStorageInterface {
 		
 		if (!$handle && $remakeIfCorrupt) {
 			@file_put_contents($filePath, $defaultContents, LOCK_EX);
-			@chmod($filePath, 0660);
+			@chmod($filePath, self::permissions());
 			if ($arrayKey !== false) {
 				$fileHandle[$arrayKey] = @fopen($filePath, 'r+');
 				$handle = $fileHandle[$arrayKey];
@@ -934,7 +962,7 @@ class wfWAFAttackDataStorageFileEngine {
 		if (!file_exists($this->file)) {
 			@file_put_contents($this->file, $this->getDefaultHeader(), LOCK_EX);
 		}
-		@chmod($this->file, 0660);
+		@chmod($this->file, wfWAFStorageFile::permissions());
 		$this->fileHandle = @fopen($this->file, 'r+');
 		if (!$this->fileHandle) {
 			throw new wfWAFStorageFileException('Unable to open ' . $this->file . ' for reading and writing.');
@@ -1505,4 +1533,4 @@ class wfWAFStorageFileException extends wfWAFException {
 class wfWAFStorageFileConfigException extends wfWAFStorageFileException {
 
 }
-
+}
