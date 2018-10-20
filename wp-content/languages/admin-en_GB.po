@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the WordPress - 4.9.x - Development - Administration package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2018-07-31 14:47:16+0000\n"
+"PO-Revision-Date: 2018-10-19 05:41:30+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -44,7 +44,7 @@ msgstr "https://en-gb.wordpress.org/plugins/classic-editor"
 
 #: wp-admin/includes/dashboard.php:1724
 msgid "https://wordpress.org/gutenberg/"
-msgstr "https://wordpress.org/gutenberg/"
+msgstr "https://en-gb.wordpress.org/gutenberg/"
 
 #: wp-admin/includes/class-wp-internal-pointers.php:167
 #: wp-admin/includes/upgrade.php:278 wp-admin/privacy.php:63
@@ -58,7 +58,7 @@ msgstr "Classic Editor"
 #. translators: Link to the Classic Editor plugin page
 #: wp-admin/includes/dashboard.php:1754
 msgid "Install the <a href=\"%s\">Classic Editor plugin</a> to keep using the current editor until you’re ready to make the switch."
-msgstr "Install the <a href=\"%s\">Classic Editor plugin</a> to keep using the current editor until you’re ready to make the switch."
+msgstr "Install the <a href=\"%s\">Classic Editor Plugin</a> to keep using the current editor until you’re ready to make the switch."
 
 #: wp-admin/includes/dashboard.php:1750
 msgid "The new editor will be enabled by default in the next major release of WordPress. If you’re not sure how compatible your current themes and plugins are, we’ve got you covered."
@@ -68,15 +68,6 @@ msgstr "The new editor will be enabled by default in the next major release of W
 msgid "Not quite ready?"
 msgstr "Not quite ready?"
 
-#. translators: Link to https://wordpress.org/gutenberg/
-#: wp-admin/includes/dashboard.php:1723
-msgid "<a href=\"%s\">Learn more about Gutenberg</a>"
-msgstr "<a href=\"%s\">Learn more about Gutenberg</a>"
-
-#: wp-admin/includes/dashboard.php:1716
-msgid "Gutenberg"
-msgstr "Gutenberg"
-
 #. translators: 1: Gutenberg call for testing handbook link, 2: Gutenberg
 #. GitHub repository issues link, 3: Gutenberg GitHub repository
 #. CONTRIBUTING.md link
@@ -84,29 +75,26 @@ msgstr "Gutenberg"
 msgid "You can help by <a href=\"%1$s\">testing</a>, <a href=\"%2$s\">filing bugs</a>, or contributing on the <a href=\"%3$s\">GitHub repository</a>."
 msgstr "You can help by <a href=\"%1$s\">testing</a>, <a href=\"%2$s\">filing bugs</a>, or contributing on the <a href=\"%3$s\">GitHub repository</a>."
 
+#. translators: Link to https://wordpress.org/gutenberg/
+#: wp-admin/includes/dashboard.php:1723
+msgid "<a href=\"%s\">Learn more about Gutenberg</a>"
+msgstr "<a href=\"%s\">Learn more about Gutenberg Editor</a>"
+
+#: wp-admin/includes/dashboard.php:1716
+msgid "Gutenberg"
+msgstr "Gutenberg Editor"
+
 #: wp-admin/includes/dashboard.php:1701
 msgid "You can take Gutenberg for a spin (and share your feedback, if you’d like) before we officially release it, by installing it as a plugin."
-msgstr "You can take Gutenberg for a spin (and share your feedback, if you’d like) before we officially release it, by installing it as a plugin."
+msgstr "You can take Gutenberg Editor for a spin (and share your feedback, if you’d like) before we officially release it, by installing it as a plugin."
 
 #: wp-admin/includes/dashboard.php:1698
 msgid "Test the new editor today."
 msgstr "Test the new editor today."
 
-#: wp-admin/includes/dashboard.php:1692
-msgid "Screenshot from the Gutenberg interface"
-msgstr "Screenshot from the Gutenberg interface"
-
-#: wp-admin/includes/dashboard.php:1684
-msgid "Take your words, media, and layout in new directions with Gutenberg, the WordPress editor we're currently building."
-msgstr "Take your words, media, and layout in new directions with Gutenberg, the WordPress editor we're currently building."
-
 #: wp-admin/includes/dashboard.php:1682
 msgid "A new, modern publishing experience is coming soon."
 msgstr "A new, modern publishing experience is coming soon."
-
-#: wp-admin/includes/dashboard.php:1676
-msgid "Try Gutenberg"
-msgstr "Try Gutenberg"
 
 #: wp-admin/includes/dashboard.php:1669
 msgid "The Classic Editor is activated"
@@ -120,13 +108,25 @@ msgstr "Activate the Classic Editor"
 msgid "Install the Classic Editor"
 msgstr "Install the Classic Editor"
 
+#: wp-admin/includes/dashboard.php:1676
+msgid "Try Gutenberg"
+msgstr "Try Gutenberg Editor"
+
 #: wp-admin/includes/dashboard.php:1653
 msgid "Activate Gutenberg"
-msgstr "Activate Gutenberg"
+msgstr "Activate Gutenberg Editor"
 
 #: wp-admin/includes/dashboard.php:1648
 msgid "Install Gutenberg"
-msgstr "Install Gutenberg"
+msgstr "Install Gutenberg Editor"
+
+#: wp-admin/includes/dashboard.php:1692
+msgid "Screenshot from the Gutenberg interface"
+msgstr "Screenshot from the Gutenberg Editor interface"
+
+#: wp-admin/includes/dashboard.php:1684
+msgid "Take your words, media, and layout in new directions with Gutenberg, the WordPress editor we're currently building."
+msgstr "Take your words, media, and layout in new directions with Gutenberg, the WordPress editor we're currently building."
 
 #. translators: %s: Page Title
 #: wp-admin/includes/misc.php:1242
@@ -1099,7 +1099,7 @@ msgstr "https://wordpress.org/plugins/gutenberg/"
 
 #: wp-admin/about.php:335
 msgid "WordPress is working on a new way to create and control your content and we&#8217;d love to have your help. Interested in being an <a href=\"%s\">early tester</a> or getting involved with the Gutenberg project? <a href=\"%s\">Contribute on GitHub</a>."
-msgstr "WordPress is working on a new way to create and control your content and we&#8217;d love to have your help. Interested in being an <a href=\"%s\">early tester</a> or getting involved with the Gutenberg project? <a href=\"%s\">Contribute on GitHub</a>."
+msgstr "WordPress is working on a new way to create and control your content and we&#8217;d love to have your help. Interested in being an <a href=\"%s\">early tester</a> or getting involved with the Gutenberg Editor project? <a href=\"%s\">Contribute on GitHub</a>."
 
 #. translators: %s: handshake emoji
 #: wp-admin/about.php:329
@@ -1258,7 +1258,7 @@ msgstr "Likely direct inclusion of %1$s in order to use %2$s. This is very wrong
 
 #: wp-admin/index.php:117
 msgid "Dismiss the Try Gutenberg panel"
-msgstr "Dismiss the Try Gutenberg panel"
+msgstr "Dismiss the Try Gutenberg Editor panel"
 
 #: wp-admin/includes/class-wp-screen.php:1050
 msgid "New Editor"
