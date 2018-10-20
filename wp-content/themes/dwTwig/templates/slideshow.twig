@@ -1,0 +1,12 @@
+<section id="slideshow">
+  {% for item in post.get_field('slideshow') %}
+    <div class="slideshow-item">
+      <div class="slideshow-image">
+        <img src="{{TimberImage(item.image).src}}" />
+      </div>
+      <div class="slideshow-caption">
+        {{item.description}}
+      </div>
+    </div>
+  {% endfor %}
+</section>
