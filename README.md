@@ -11,7 +11,7 @@ This is a quick start package for new Wordpress Projects build with Timber
 * Make a DB user. (default now is root)
 * Remember to change wp-config.php
 * **Change push.sh configuration**
-* login to /wp-admin `cherry/Τσερι!@12`
+* login to /wp-admin `admin/admin`
 
 # Database #
 -----------------------------------------------
@@ -41,7 +41,7 @@ This is a quick start package for new Wordpress Projects build with Timber
 
 **Users:**
 
-* Super User: `cherry/Τσερι!@12`
+* Super User: `admin/admin`
 
 
 # Development #
@@ -49,10 +49,10 @@ This is a quick start package for new Wordpress Projects build with Timber
 
 **Paths**
 
-* theme.css --> `wp-content/themes/entropia/static/css/theme.css`
-* theme.js --> `wp-content/themes/entropia/static/js/theme.js`
-* custom.css --> `wp-content/themes/entropia/static/custom.css`
-* custom.js --> `wp-content/themes/entropia/static/custom.js`
+* theme.css --> `wp-content/themes/wpTwig/static/css/theme.css`
+* theme.js --> `wp-content/themes/wpTwig/static/js/theme.js`
+* custom.css --> `wp-content/themes/wpTwig/static/custom.css`
+* custom.js --> `wp-content/themes/wpTwig/static/custom.js`
 
 Development workflow as usual.
 
