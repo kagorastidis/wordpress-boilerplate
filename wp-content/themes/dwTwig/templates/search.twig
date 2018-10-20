@@ -2,12 +2,13 @@
 
 {% block content %}
 	<section id="news" class="container">
+		<h2 class="search-header">{{function('pll_e','found_results')}}: {{posts|length}}</h2>
 		{% if posts %}
 			{% for post in posts %}
 				{% include ['tease-search-'~post.post_type~'.twig', 'tease-search.twig'] %}
 			{% endfor %}
 		{% else %}
-			<h2 class="search-not-found col-xs-12">Δεν βρέθηκαν αποτελέσματα</h2>
+			{% include "no-results.twig" %}
 		{% endif %}
 	</section>
 {% endblock %}

@@ -86,10 +86,13 @@ if(is_admin()) {
 		$strings = [
 			'inline' => [
 				'contact',
-				'view all'
+				'view all',
+				'found_results',
+				'no_results_found'
 			],
 			'multiline' => [
-				'contact_details'
+				'contact_details',
+				'search_tips'
 			]
 		];
 		foreach($strings['inline'] as $string) {

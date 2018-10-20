@@ -1,0 +1,15 @@
+{% block content %}
+	<div class="container no-results-wrapper">
+		<div class="row text-center">
+			<h2>
+				{{function('pll_e', 'no_results_found')}}
+			</h2>
+			<div class="hints">
+				{{function('pll_e', 'search_tips')}}
+			</div>
+			<div class="ask-help">
+				<a class="btn btn-primary" href="{{function('getSingleContentUrlById', 83)}}">{{function('pll_e', 'contact')}}</a>
+			</div>
+		</div>
+	</div>
+{% endblock %}
