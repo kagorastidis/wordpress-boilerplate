@@ -1,4 +1,5 @@
 <?php
+if (defined('WFWAF_VERSION') && !defined('WFWAF_RUN_COMPLETE')) {
 
 class wfWAF {
 
@@ -233,6 +234,7 @@ auEa+7b+FGTKs7dUo2BNGR7OVifK4GZ8w/ajS0TelhrSRi3BBQCGXLzUO/UURUAh
 						$this->whitelistRuleForParam($path, $paramKey, $ruleID, array(
 							'timestamp'   => time(),
 							'description' => 'Whitelisted by via false positive dialog',
+							'source'	  => 'false-positive',
 							'ip'          => $request->getIP(),
 						));
 						$whitelistCount++;
@@ -870,6 +872,23 @@ HTML
 		}
 		return !empty($this->disabledRules[$ruleID]);
 	}
+	
+	public function getDisabledRuleIDs() {
+		if ($this->disabledRules === null) {
+			$this->disabledRules = $this->getStorageEngine()->getConfig('disabledRules');
+			if (!is_array($this->disabledRules)) {
+				$this->disabledRules = array();
+			}
+		}
+		
+		$ruleIDs = array();
+		foreach ($this->disabledRules as $id => $value) {
+			if (!empty($value)) {
+				$ruleIDs[] = $id;
+			}
+		}
+		return $ruleIDs;
+	}
 
 	/**
 	 * @param wfWAFRule $rule
@@ -1168,6 +1187,7 @@ HTML
 						$data = array(
 							'timestamp' => time(),
 							'description' => 'Whitelisted while in Learning Mode.',
+							'source' => 'learning-mode',
 							'ip' => $this->getRequest()->getIP(),
 						);
 						if (function_exists('get_current_user_id')) {
@@ -1707,14 +1727,19 @@ class wfWAFCronFetchRulesEvent extends wfWAFCronEvent {
 		$success = true;
 		$guessSiteURL = sprintf('%s://%s/', $waf->getRequest()->getProtocol(), $waf->getRequest()->getHost());
 		try {
-			$this->response = wfWAFHTTP::get(WFWAF_API_URL_SEC . "?" . http_build_query(array(
-					'action'   => 'get_waf_rules',
-					'k'        => $waf->getStorageEngine()->getConfig('apiKey', null, 'synced'),
-					's'        => $waf->getStorageEngine()->getConfig('siteURL', null, 'synced') ? $waf->getStorageEngine()->getConfig('siteURL', null, 'synced') : $guessSiteURL,
-					'h'        => $waf->getStorageEngine()->getConfig('homeURL', null, 'synced') ? $waf->getStorageEngine()->getConfig('homeURL', null, 'synced') : $guessSiteURL,
-					'openssl'  => $waf->hasOpenSSL() ? 1 : 0,
-					'betaFeed' => (int) $waf->getStorageEngine()->getConfig('betaThreatDefenseFeed', null, 'synced'),
-				), null, '&'));
+			$payload = array(
+				'action'   => 'get_waf_rules',
+				'k'        => $waf->getStorageEngine()->getConfig('apiKey', null, 'synced'),
+				's'        => $waf->getStorageEngine()->getConfig('siteURL', null, 'synced') ? $waf->getStorageEngine()->getConfig('siteURL', null, 'synced') : $guessSiteURL,
+				'h'        => $waf->getStorageEngine()->getConfig('homeURL', null, 'synced') ? $waf->getStorageEngine()->getConfig('homeURL', null, 'synced') : $guessSiteURL,
+				'openssl'  => $waf->hasOpenSSL() ? 1 : 0,
+				'betaFeed' => (int) $waf->getStorageEngine()->getConfig('betaThreatDefenseFeed', null, 'synced'),
+			);
+			if ($waf->getStorageEngine()->getConfig('other_WFNet', true, 'synced')) {
+				$payload['disabled'] = implode('|', $waf->getDisabledRuleIDs());
+			}
+			
+			$this->response = wfWAFHTTP::get(WFWAF_API_URL_SEC . "?" . http_build_query($payload, null, '&'));
 			if ($this->response) {
 				$jsonData = wfWAFUtils::json_decode($this->response->getBody(), true);
 				if (is_array($jsonData)) {
@@ -1934,6 +1959,27 @@ class wfWAFCronFetchBlacklistPrefixesEvent extends wfWAFCronEvent {
 		return $newEvent;
 	}
 }
+	
+interface wfWAFObserver {
+	
+	public function prevBlocked($ip);
+	
+	public function block($ip, $exception);
+	
+	public function allow($ip, $exception);
+	
+	public function blockXSS($ip, $exception);
+	
+	public function blockSQLi($ip, $exception);
+	
+	public function log($ip, $exception);
+	
+	public function wafDisabled();
+	
+	public function beforeRunRules();
+	
+	public function afterRunRules();
+}
 
 class wfWAFEventBus implements wfWAFObserver {
 
@@ -2023,27 +2069,6 @@ class wfWAFEventBus implements wfWAFObserver {
 			$observer->afterRunRules();
 		}
 	}
-}
-
-interface wfWAFObserver {
-
-	public function prevBlocked($ip);
-
-	public function block($ip, $exception);
-
-	public function allow($ip, $exception);
-
-	public function blockXSS($ip, $exception);
-
-	public function blockSQLi($ip, $exception);
-	
-	public function log($ip, $exception);
-
-	public function wafDisabled();
-
-	public function beforeRunRules();
-
-	public function afterRunRules();
 }
 
 class wfWAFBaseObserver implements wfWAFObserver {
@@ -2175,4 +2200,5 @@ class wfWAFBuildRulesException extends wfWAFException {
 }
 
 class wfWAFEventBusException extends wfWAFException {
+}
 }

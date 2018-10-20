@@ -2,9 +2,9 @@
 Contributors: mmaunder 
 Tags: security, firewall, malware scanner, web application firewall, antivirus, block hackers, country blocking, clean hacked site, blacklist, waf, login security
 Requires at least: 3.9
-Requires PHP: 5.2
+Requires PHP: 5.3
 Tested up to: 4.9.8
-Stable tag: 7.1.12
+Stable tag: 7.1.16
 
 Secure your website with the most comprehensive WordPress security plugin. Firewall, malware scan, blocking, live traffic, login security & more.
 
@@ -170,6 +170,30 @@ Secure your website with Wordfence.
 
 
 == Changelog ==
+
+= 7.1.16 =
+* Improvement: Service whitelisting can now be selectively toggled on or off per service.
+* Improvement: Updated bundled GeoIP database.
+* Change: Removed the "Disable Wordfence Cookies" option as we've removed all cookies it affected.
+* Change: Updates that refresh country statistics are more efficient and now only affect the most recent records.
+* Change: Changed the title of the Wordfence Dashboard so it's easier to identify when many tabs are open.
+* Fix: Fixed an issue with country blocking and XML-RPC requests containing credentials.
+
+= 7.1.15 =
+* Fix: Addressed a plugin conflict with the composer autoloader.
+
+= 7.1.14 =
+* Improvement: Reduced queries and potential table size for rate limiting-related data.
+* Improvement: Updated the internal browscap database.
+* Improvement: Better error reporting for scan failures due to connectivity issues.
+* Improvement: WAF-related file permissions will now lock down further when possible.
+* Improvement: Hardening for sites on servers with insecure configuration, which should not be enabled on publicly accessible servers. Thanks Janek Vind.
+* Change: Switched the minimum PHP version to 5.3.
+* Fix: Prevent bypass of author enumeration prevention by using invalid parameters. Thanks Janek Vind.
+* Fix: Wordfence crons will now automatically reschedule if missing for any reason.
+* Fix: Fixed an issue where the block counts and total IPs blocked values on the dashboard might not agree.
+* Fix: Corrected the message shown on Live Traffic when a country blocking bypass URL is used.
+* Fix: Removed extra spacing in the example ranges for "Whitelisted IP addresses that bypass all rules"
 
 = 7.1.12 =
 * Improvement: Updated bundled GeoIP database.

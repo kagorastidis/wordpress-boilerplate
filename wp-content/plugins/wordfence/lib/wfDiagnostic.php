@@ -83,6 +83,7 @@ class wfDiagnostic
 					'wafLogPath' => __('WAF log path', 'wordfence'),
 					'wafSubdirectoryInstall' => __('WAF subdirectory installation', 'wordfence'),
 					'wafAutoPrependFilePath' => __('wordfence-waf.php path', 'wordfence'),
+					'wafFilePermissions' => __('WAF File Permissions', 'wordfence'),
 				),
 			),
 			'MySQL' => array(
@@ -323,6 +324,28 @@ class wfDiagnostic
 			$path = '';
 		}
 		return array('test' => true, 'infoOnly' => true, 'message' => $path);
+	}
+	
+	public function wafFilePermissions() {
+		if (defined('WFWAF_LOG_FILE_MODE')) {
+			return array('test' => true, 'infoOnly' => true, 'message' => sprintf(__('%s - using constant', 'wordfence'), str_pad(decoct(WFWAF_LOG_FILE_MODE), 4, '0', STR_PAD_LEFT)));
+		}
+		
+		if (defined('WFWAF_LOG_PATH')) {
+			$template = rtrim(WFWAF_LOG_PATH, '/') . '/template.php';
+			if (file_exists($template)) {
+				$stat = @stat($template);
+				if ($stat !== false) {
+					$mode = $stat[2];
+					$updatedMode = 0600;
+					if (($mode & 0020) == 0020) {
+						$updatedMode = $updatedMode | 0060;
+					}
+					return array('test' => true, 'infoOnly' => true, 'message' => sprintf(__('%s - using template', 'wordfence'), str_pad(decoct($updatedMode), 4, '0', STR_PAD_LEFT)));
+				}
+			}
+		}
+		return array('test' => true, 'infoOnly' => true, 'message' => __('0660 - using default', 'wordfence'));
 	}
 
 	public function processOwner() {

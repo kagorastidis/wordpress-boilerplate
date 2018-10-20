@@ -56,6 +56,7 @@ class wfSupportController {
 	const ITEM_FIREWALL_WAF_WHITELIST = 'firewall-waf-whitelist';
 	const ITEM_FIREWALL_WAF_OPTION_DELAY_BLOCKING = 'firewall-waf-option-delay-blocking';
 	const ITEM_FIREWALL_WAF_OPTION_WHITELISTED_IPS = 'firewall-waf-option-whitelisted-ips';
+	const ITEM_FIREWALL_WAF_OPTION_WHITELISTED_SERVICES = 'firewall-waf-option-whitelisted-services';
 	const ITEM_FIREWALL_WAF_IGNORED_ALERT_IPS = 'firewall-waf-option-ignored-alert-ips';
 	const ITEM_FIREWALL_WAF_OPTION_IMMEDIATELY_BLOCK_URLS = 'firewall-waf-option-immediately-block-urls';
 	const ITEM_FIREWALL_WAF_OPTION_ENABLE_LOGIN_SECURITY = 'firewall-waf-option-enable-login-security';
@@ -223,6 +224,7 @@ class wfSupportController {
 			case self::ITEM_FIREWALL_WAF_WHITELIST:
 			case self::ITEM_FIREWALL_WAF_OPTION_DELAY_BLOCKING:
 			case self::ITEM_FIREWALL_WAF_OPTION_WHITELISTED_IPS:
+			case self::ITEM_FIREWALL_WAF_OPTION_WHITELISTED_SERVICES:
 			case self::ITEM_FIREWALL_WAF_IGNORED_ALERT_IPS:
 			case self::ITEM_FIREWALL_WAF_OPTION_IMMEDIATELY_BLOCK_URLS:
 			case self::ITEM_FIREWALL_WAF_OPTION_ENABLE_LOGIN_SECURITY:

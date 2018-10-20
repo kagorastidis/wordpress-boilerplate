@@ -177,7 +177,7 @@ class wfBlock {
 		
 		if ($payload['type'] == 'ip-address') {
 			if (!isset($payload['ip']) || !filter_var(trim($payload['ip']), FILTER_VALIDATE_IP) || @wfUtils::inet_pton(trim($payload['ip'])) === false) { return __('Invalid IP address.', 'wordfence'); }
-			if (self::isWhitelisted(trim($payload['ip']))) { return __('This IP address is in a range of addresses that Wordfence does not block. The IP range may be internal or belong to a service that is safe to allow.', 'wordfence'); }
+			if (self::isWhitelisted(trim($payload['ip']))) { return sprintf(__('This IP address is in a range of addresses that Wordfence does not block. The IP range may be internal or belong to a service that is always allowed. Whitelisting of external services can be disabled. <a href="%s" target="_blank" rel="noopener noreferrer">Learn More</a>', 'wordfence'), wfSupportController::supportURL(wfSupportController::ITEM_FIREWALL_WAF_OPTION_WHITELISTED_SERVICES)); }
 		}
 		else if ($payload['type'] == 'country') {
 			if (!isset($payload['blockLogin']) || !isset($payload['blockSite'])) { return __('Nothing selected to block.', 'wordfence'); }
@@ -1310,13 +1310,18 @@ END AS `detailSort`
 				if ($this->_shouldBypassCountryBlocking()) { //Has valid bypass cookie
 					return self::MATCH_NONE;
 				}
-				else if (!$this->blockLogin && $this->_isAuthRequest()) { //Not blocking login and this is a login request
+				
+				if ($this->blockLogin) {
+					add_filter('authenticate', array($this, '_checkForBlockedCountryFilter'), 1, 1);
+				}
+				
+				if (!$this->blockLogin && $this->_isAuthRequest()) { //Not blocking login and this is a login request
 					return self::MATCH_NONE;
 				}
-				else if (!$this->blockSite && !$this->_isAuthRequest()) { //Not blocking site and this is a site request
+				else if (!$this->blockSite && !$this->_isAuthRequest()) { //Not blocking site and this may be a site request
 					return self::MATCH_NONE;
 				}
-				else if (is_user_logged_in() && !wfConfig::get('cbl_loggedInBlocked', false)) { //Not blocking logged in users and a user is
+				else if (is_user_logged_in() && !wfConfig::get('cbl_loggedInBlocked', false)) { //Not blocking logged in users and a login session exists
 					return self::MATCH_NONE;
 				}
 				
@@ -1326,11 +1331,8 @@ END AS `detailSort`
 				}
 				
 				//Block the login form itself and any attempt to authenticate
-				if ($this->blockLogin) {
-					add_filter('authenticate', array($this, '_checkForBlockedCountryFilter'), 1, 1);
-					if ($this->_isAuthRequest()) {
-						return $this->_checkForBlockedCountry();
-					}
+				if ($this->blockLogin && $this->_isAuthRequest()) {
+					return $this->_checkForBlockedCountry();
 				}
 				
 				//Block requests that aren't to the login page, xmlrpc.php, or a user already logged in

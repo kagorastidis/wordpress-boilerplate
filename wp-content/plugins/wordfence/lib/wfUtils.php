@@ -515,11 +515,58 @@ class wfUtils {
 	public static function truthyToInt($value) {
 		return self::truthyToBoolean($value) ? 1 : 0;
 	}
+	
+	/**
+	 * Returns the whitelist presets, which first grabs the bundled list and then merges the dynamic list into it.
+	 * 
+	 * @return array
+	 */
+	public static function whitelistPresets() {
+		static $_cachedPresets = null;
+		if ($_cachedPresets === null) {
+			include('wfIPWhitelist.php'); /** @var array $wfIPWhitelist */
+			$currentPresets = wfConfig::getJSON('whitelistPresets', array());
+			if (is_array($currentPresets)) {
+				$_cachedPresets = array_merge($wfIPWhitelist, $currentPresets);
+			}
+			else {
+				$_cachedPresets = $wfIPWhitelist;
+			}
+		}
+		return $_cachedPresets;
+	}
+	
+	/**
+	 * Returns an array containing all whitelisted service IPs/ranges. The returned array is grouped by service
+	 * tag: array('service1' => array('range1', 'range2', range3', ...), ...)
+	 * 
+	 * @return array
+	 */
+	public static function whitelistedServiceIPs() {
+		$result = array();
+		$whitelistPresets = self::whitelistPresets();
+		$whitelistedServices = wfConfig::getJSON('whitelistedServices', array());
+		foreach ($whitelistPresets as $tag => $preset) {
+			if (!isset($preset['n'])) { //Just an array of IPs/ranges
+				$result[$tag] = $preset;
+				continue;
+			}
+			
+			if ((isset($preset['h']) && $preset['h']) || (isset($preset['f']) && $preset['f'])) { //Forced
+				$result[$tag] = $preset['r'];
+				continue;
+			}
+			
+			if ((!isset($whitelistedServices[$tag]) && isset($preset['d']) && $preset['d']) || (isset($whitelistedServices[$tag]) && $whitelistedServices[$tag])) {
+				$result[$tag] = $preset['r'];
+			}
+		}
+		return $result;
+	}
 
 	/**
-	 * Get the list of whitelisted IPs and networks
-	 *
-	 * Results may include wfUserIPRange objects for now. Ideally everything would be in CIDR notation.
+	 * Get the list of whitelisted IPs and networks, which is a combination of preset IPs/ranges and user-entered
+	 * IPs/ranges.
 	 *
 	 * @param string	$filter	Group name to filter whitelist by
 	 * @return array
@@ -528,19 +575,16 @@ class wfUtils {
 		static $wfIPWhitelist;
 
 		if (!isset($wfIPWhitelist)) {
-			include('wfIPWhitelist.php');
-
-			// Memoize user defined whitelist IPs and ranges
-			// TODO: Convert everything to CIDR
+			$wfIPWhitelist = self::whitelistedServiceIPs();
+			
+			//Append user ranges
 			$wfIPWhitelist['user'] = array();
-
 			foreach (array_filter(explode(',', wfConfig::get('whitelisted'))) as $ip) {
 				$wfIPWhitelist['user'][] = new wfUserIPRange($ip);
 			}
 		}
 
 		$whitelist = array();
-
 		foreach ($wfIPWhitelist as $group => $values) {
 			if ($filter === null || $group === $filter) {
 				$whitelist = array_merge($whitelist, $values);
@@ -1347,8 +1391,8 @@ class wfUtils {
 		}
 		
 		try {
-			$geoip = wfGeoIP2::shared();
-			$code = $geoip->countryCode($IP);
+			$geoip = @wfGeoIP2::shared();
+			$code = @$geoip->countryCode($IP);
 			return is_string($code) ? $code : '';
 		}
 		catch (Exception $e) {
@@ -1367,8 +1411,8 @@ class wfUtils {
 		}
 		
 		try {
-			$geoip = wfGeoIP2::shared();
-			return $geoip->version();
+			$geoip = @wfGeoIP2::shared();
+			return @$geoip->version();
 		}
 		catch (Exception $e) {
 			//Ignore

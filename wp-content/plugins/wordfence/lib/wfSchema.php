@@ -11,21 +11,13 @@ class wfSchema {
 		'wfThrottleLog',
 		'wfNet404s',
 		'wfBlockedCommentLog',
+		'wfVulnScanners',
+		'wfBadLeechers',
+		'wfLeechers',
+		'wfScanners',
 	);
 	
 	private static $tables = array(
-"wfBadLeechers" => "(
-  `eMin` int(10) unsigned NOT NULL,
-  `IP` binary(16) NOT NULL DEFAULT '\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0',
-  `hits` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`eMin`,`IP`)
-) DEFAULT CHARSET=utf8",
-"wfVulnScanners" => "(
-  `IP` binary(16) NOT NULL DEFAULT '\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0',
-  `ctime` int(10) unsigned NOT NULL,
-  `hits` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`IP`)
-) DEFAULT CHARSET=utf8",
 "wfBlocks7" => "(
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `type` int(10) unsigned NOT NULL DEFAULT '0',
@@ -118,11 +110,12 @@ class wfSchema {
   KEY `ignoreP` (`ignoreP`),
   KEY `ignoreC` (`ignoreC`)
 ) DEFAULT CHARSET=utf8",
-"wfLeechers" => "(
+"wfTrafficRates" => "(
   `eMin` int(10) unsigned NOT NULL,
   `IP` binary(16) NOT NULL DEFAULT '\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0',
+  `hitType` enum('hit','404') NOT NULL DEFAULT 'hit',
   `hits` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`eMin`,`IP`)
+  PRIMARY KEY (`eMin`,`IP`,`hitType`)
 ) DEFAULT CHARSET=utf8",
 "wfLocs" => "(
   `IP` binary(16) NOT NULL DEFAULT '\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0',
@@ -155,12 +148,6 @@ class wfSchema {
   `host` varchar(255) NOT NULL,
   `lastUpdate` int(10) unsigned NOT NULL,
   PRIMARY KEY (`IP`)
-) DEFAULT CHARSET=utf8",
-"wfScanners" => "(
-  `eMin` int(10) unsigned NOT NULL,
-  `IP` binary(16) NOT NULL DEFAULT '\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0\\0',
-  `hits` smallint(5) unsigned NOT NULL,
-  PRIMARY KEY (`eMin`,`IP`)
 ) DEFAULT CHARSET=utf8",
 "wfStatus" => "(
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
