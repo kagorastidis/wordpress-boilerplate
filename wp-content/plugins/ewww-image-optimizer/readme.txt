@@ -3,9 +3,9 @@ Contributors: nosilver4u
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=MKMQKCBFFG3WW
 Tags: image, compress, resize, optimize, optimization, lossless, lossy, seo, webp, wp-cli, scale, tinypng, tinyjpg
 Requires at least: 4.9
-Tested up to: 4.9
-Requires PHP: 5.5
-Stable tag: 4.4.2
+Tested up to: 5.1
+Requires PHP: 5.6
+Stable tag: 4.6.2
 License: GPLv3
 
 Speed up your website and improve your visitors' experience by automatically compressing and resizing images and PDFs. Boost SEO and improve sales.
@@ -59,7 +59,7 @@ All images created by the built-in WP_Image_Editor class will be automatically o
 
 = WebP Images =
 
-One-click WebP with ExactDN and Alternative WebP Rewriting. Otherwise, can generate WebP versions of your images, and enables you to serve even smaller images to supported browsers. Several methods are available for serving WebP images, including Apache-compatible rewrite rules and our Alternative WebP Rewriting option compatible with caches and CDNs. Also works with the WebP option in the Cache Enabler plugin from KeyCDN.
+One-click WebP with ExactDN and JS WebP Rewriting. Otherwise, can generate WebP versions of your images, and enables you to serve even smaller images to supported browsers. Several methods are available for serving WebP images, including Apache-compatible rewrite rules and our JS WebP Rewriting option compatible with caches and CDNs. Also works with the WebP option in the Cache Enabler plugin from KeyCDN.
 
 = WP-CLI =
 
@@ -87,7 +87,7 @@ Uploads are automatically optimized. Look for Optimize under the Image Store (Ga
 
 = CDN Support =
 
-Uploads to Amazon S3, Azure Storage, Cloudinary, and DreamSpeed CDN are optimized. All pull mode CDNs like Cloudflare, KeyCDN, MaxCDN, and Sucuri CloudProxy are also supported.
+[WP Offload Media](https://wordpress.org/plugins/amazon-s3-and-cloudfront/) is the officially supported (and recommended) plugin for uploads to Amazon S3 and Digital Ocean Spaces. We also support the Azure Storage and Cloudinary plugins. All pull mode CDNs like Cloudflare, KeyCDN, MaxCDN, and Sucuri CloudProxy work automatically, but will require you to purge the cache after a bulk optimization.
 
 = WPML Compatible =
 
@@ -171,95 +171,34 @@ http://developer.yahoo.com/performance/rules.html#opt_images
 
 == Changelog ==
 
-* Feature requests can be submitted via https://ewww.io/contact-us/ and commented on here: https://trello.com/b/Fp81dWof/ewww-image-optimizer
+* Feature requests can be viewed and submitted at https://github.com/nosilver4u/ewww-image-optimizer/labels/enhancement
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/ewww-image-optimizer/
 
-= 4.4.2 =
-* added: notice for Pantheon users that an API key is required
-* added: ExactDN fully supports protocol-relative urls for non-image resources
-* changed: better lazy load support in ExactDN
-* fixed: optimization failure produces rename() errors
-* fixed: folder scanner ignores files with no extension
-* fixed: Alt WebP blocks on Facebook tracking pixel
-* fixed: ExactDN srcset functions cause duplicate image requests with zoom=1
-* fixed: ExactDN srcset fill adds double arguments to urls
-* fixed: srcset fill generates notices with non-numeric widths
-* fixed: bulk scanner stuck in resume mode with nothing to do
+= 4.6.2 =
+* changed: API key may be defined as EWWW_IMAGE_OPTIMIZER_CLOUD_KEY
+* fixed: if img tag is missing dimensions, ExactDN sometimes loads original rather than existing thumbnail
+* fixed: TinyPNG/TinyJPG images skipped when Force Re-optimize is checked
 
-= 4.4.1 =
-* fixed: ExactDN srcset fill replaces images with first image on page
+= 4.6.1 =
+* added: automatic configuration for ExactDN + WP Offload Media
+* fixed: bulk action from media library skipping last attachment in selection
+* fixed: uninstall function throws fatal error preventing deletion
 
-= 4.4.0 =
-* added: preserve animations in GIF images during resize operations
-* added: ExactDN will fill in srcset/sizes attributes for all images based on detected width for better mobile support
-* added: configuration options in the settings page for several "hidden" ExactDN options
-* changed: Alt WebP still depends on jQuery, but jQuery can be loaded in async or defer mode
-* changed: Remove Metadata option has been renamed, if you previously had it configured as an override (JPEGTRAN_COPY), please use the new name: EWWW_IMAGE_OPTIMIZER_METADATA_REMOVE
-* changed: ExactDN uses premium compression by default
-* fixed: regression with ExactDN and max-width style attributes
-* fixed: WP esc_url mangles ExactDN urls
-* fixed: WebP images missing from S3 when using WP Offload S3
-* fixed: PDF uploads with S3 Uploads plugin
-* deprecated: PHP 5.5 support will be removed in the next major release (version 4.5)
-* removed: PHP 5.4 no longer supported
-
-= 4.3.2 =
-* changed: prevent dynamic JS/CSS urls within wp-admin/ from being rewritten by ExactDN
-* fixed: auto-convert PNG to JPG was running on images with transparency
-* fixed: Alt WebP broken on sites that have jquery-migrate disabled
-
-= 4.3.1 =
-* fixed: fatal error on older WP versions due to missing privacy policy function
-
-= 4.3.0 =
-* added: Alt WebP enables instant conversion with ExactDN, no need for bulk optimize
-* added: links within settings and other notices for contextual help
-* added: auto-convert large PNG images to JPG during upload, define EWWW_IMAGE_OPTIMIZER_DISABLE_AUTOCONVERT to skip
-* added: use file modification time to add query strings on JS/CSS files for cache invalidation on ExactDN
-* added: use EXACTDN_EXCLUDE in wp-config.php to bypass ExactDN for JS, CSS, etc.
-* added: NextGEN image urls properly rewritten for ExactDN
-* added: NextGEN dynamic thumbs included during manual/bulk optimization
-* added: auto-installer for Cloud plugin when running EWWW IO on a "banned" webhost
-* added: suggested privacy policy text for users of the API and ExactDN
-* added: detect wordpress.com sites and disable exec function and binaries
-* changed: resizing uses the primary media dimensions unless the "other" dimensions are configured
-* changed: Resize Other Images removed from GUI, configure via Overrides tab
-* changed: filter NextGEN quality to prevent oversized thumbs
-* changed: allow crop via filter even when one dimension is the same as the original
-* changed: auto-rotate function disabled with EWWW_IMAGE_OPTIMIZER_DISABLE_AUTOROTATE
-* changed: one-click copy for debug info, and debug collapsed by default in media library and bulk results
-* changed: bulk operations for batches of NextGEN images now use the bulk optimizer page instead of loading inline
-* fixed: thumbs not generated during WP/LR Sync
-* fixed: uploading images in the Gutenberg editor uses the wrong resize dimensions
-* fixed: unique filename function producing names with a hyphen and no digits
-* fixed: encoded ampersands within the path portion of a url prevent ExactDN parsing
-* fixed: entering a decimal for bulk delay does nothing
-* fixed: if urls on a localized WPML domain are using the default domain, ExactDN ignores them
-* fixed: toggle for plugin status and bulk status generate admin-ajax.php 403 errors
-* fixed: PNGOUT installer confirmation notice was missing
-* deprecated: PHP 5.4 support will be removed in the next major release (version 4.4)
+= 4.6.0 =
+* added: preserve animations in GIF images during resize operations for sites using Imagick extension
+* changed: EXACTDN_EXCLUDE applies to all resources, including images, CSS, JS, fonts, etc.
+* changed: API/ExactDN preserves color profiles, even when removing image metadata
+* changed: new queue table for bulk optimizer to avoid exceeding max packet size for MySQL
+* changed: unit tests run on PHP 7.3 also
+* fixed: too many settings updates when trying to prevent slow queries
+* fixed: ExactDN rewrites urls to static HTML files
+* fixed: ExactDN skips 1x url in some cases, causing browser upscaling
+* fixed: PHP notice when EXACTDN_EXCLUDE is defined
+* fixed: race condition in Alt WebP prevents Webp derivatives from replacing the originals
 
 = Earlier versions =
 Please refer to the separate changelog.txt file.
 
-== Upgrade Notice ==
-
-= 4.2.0 =
-* ExactDN verification rewritten, please report any issues immediately.
-* PHP 5.3 support discontinued, see https://docs.ewww.io/article/55-upgrading-php
-
-= 4.1.0 =
-* Security update: gifsicle and optipng have been updated to resolve security flaws.
-* ExactDN now processes JS/CSS/Fonts for even more speed.
-
-= 4.0.0 =
-* Introduced new ExactDN with CDN and automatic image resizing.
-
-= 3.6.0 =
-* API functions have been rewritten to use core WP detection for https capability, please report any errors right away.
-* Several options have been removed from the user interface, see the changelog for details.
-
 == Contact and Credits ==
 
-Written by [Shane Bishop](https://ewww.io). Based upon CW Image Optimizer, which was written by [Jacob Allred](http://www.jacoballred.com/) at [Corban Works, LLC](http://www.corbanworks.com/). CW Image Optimizer was based on WP Smush.it. Jpegtran is the work of the Independent JPEG Group. PEL is the work of Martin Geisler, Lars Olesen, and Erik Oskam. ExactDN class based upon the Photon module from Jetpack.
-
+Written by [Shane Bishop](https://ewww.io). Based upon CW Image Optimizer, which was written by [Jacob Allred](http://www.jacoballred.com/) at [Corban Works, LLC](http://www.corbanworks.com/). CW Image Optimizer was based on WP Smush.it. Jpegtran is the work of the Independent JPEG Group. PEL is the work of Martin Geisler, Lars Olesen, and Erik Oskam. ExactDN and HTML parsing classes based upon the Photon module from Jetpack.

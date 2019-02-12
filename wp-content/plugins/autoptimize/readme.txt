@@ -3,9 +3,9 @@ Contributors: futtta, optimizingmatters, zytzagoo, turl
 Tags: optimize, minify, performance, pagespeed, image optimization
 Donate link: http://blog.futtta.be/2013/10/21/do-not-donate-to-me/
 Requires at least: 4.0
-Tested up to: 4.9
+Tested up to: 5.0
 Requires PHP: 5.3
-Stable tag: 2.4.1
+Stable tag: 2.4.4
 
 Autoptimize speeds up your website by optimizing JS, CSS, HTML, Google Fonts and images, async-ing JS, removing emoji cruft and more.
 
@@ -191,7 +191,7 @@ NextGen Galleries does some nifty stuff to add JavaScript. In order for Autoptim
 = What is noptimize? =
 
 Starting with version 1.6.6 Autoptimize excludes everything inside noptimize tags, e.g.:
-`&lt;!--noptimize-->&lt;script>alert('this will not get autoptimized');&lt;/script>&lt;!--/noptimize-->`
+`&lt;!&#45;&#45;noptimize&#45;&#45;>&lt;script>alert('this will not get autoptimized');&lt;/script>&lt;!&#45;&#45;/noptimize&#45;&#45;>`
 
 You can do this in your page/ post content, in widgets and in your theme files (consider creating [a child theme](http://codex.wordpress.org/Child_Themes) to avoid your work being overwritten by theme updates).
 
@@ -261,6 +261,12 @@ By default AO uses non multibyte-safe string methods, but if your PHP has the mb
 `
 add_filter('autoptimize_filter_main_use_mbstring', '__return_true');`
 
+= The Shortpixel image optimizing notice cannot be dismissed? =
+
+In some rare cases the logic to dismiss the notice does not work due to the transient (WordPress cache) not keeping the dismissed state. If this happens you can use this code snippet to make the notice go away;
+
+`add_filter( 'autoptimize_filter_main_imgopt_plug_notice', '__return_empty_string' );`
+
 = Where can I get help? =
 
 You can get help on the [wordpress.org support forum](http://wordpress.org/support/plugin/autoptimize). If you are 100% sure this your problem cannot be solved using Autoptimize configuration and that you in fact discovered a bug in the code, you can [create an issue on GitHub](https://github.com/futtta/autoptimize/issues). If you're looking for premium support, check out our [Autoptimize Pro Support and Web Performance Optimization services](http://autoptimize.com/).
@@ -276,6 +282,23 @@ You can get help on the [wordpress.org support forum](http://wordpress.org/suppo
 Just [fork Autoptimize on Github](https://github.com/futtta/autoptimize) and code away!
 
 == Changelog ==
+
+= 2.4.4 =
+* bugfix: safer way of removing extra cronjobs
+
+= 2.4.3 =
+* improved Google Fonts optimzation, praise to @nextendweb (of Smartslider3 fame)!
+* improved deferring of non-aggregated CSS when "inline & defer" is active
+* bugfix: extra ao_cachechecker scheduled jobs & improve scheduling logic
+* bugfix: some extra checks on vars to avoid PHP notices
+
+= 2.4.2 =
+* misc. improvements to image optimization logic
+* update PAnD framework to latest version to fix issues with notices not staying dismissed
+* patched JS minifying component to not break template literals as reported by Alex Kozack
+* bugfix for Google fonts subset concatenation by Rocco Aliberti, thanks!
+* bugfix not to remove querystrings if that option is not on in "Extra", kudo's to Diego Versiani for pointing out the inconsistency
+* tested and confirmed working with WordPress 5.0 (beta 5)
 
 = 2.4.1 =
 * bugfix for CSS minifier throwing a HTTP 500 error when a `}` is missing.

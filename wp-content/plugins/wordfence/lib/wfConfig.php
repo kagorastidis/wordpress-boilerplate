@@ -33,9 +33,8 @@ class wfConfig {
 	public static $defaultConfig = array(
 		//All exportable boolean options
 		"checkboxes" => array(
-			"alertOn_critical" => array('value' => true, 'autoload' => self::AUTOLOAD),
 			"alertOn_update" => array('value' => false, 'autoload' => self::AUTOLOAD),
-			"alertOn_warnings" => array('value' => true, 'autoload' => self::AUTOLOAD),
+			"alertOn_scanIssues" => array('value' => true, 'autoload' => self::AUTOLOAD),
 			"alertOn_throttle" => array('value' => false, 'autoload' => self::AUTOLOAD),
 			"alertOn_block" => array('value' => true, 'autoload' => self::AUTOLOAD),
 			"alertOn_loginLockout" => array('value' => true, 'autoload' => self::AUTOLOAD),
@@ -46,7 +45,7 @@ class wfConfig {
 			"alertOn_nonAdminLogin" => array('value' => false, 'autoload' => self::AUTOLOAD),
 			"alertOn_firstNonAdminLoginOnly" => array('value' => false, 'autoload' => self::AUTOLOAD),
 			"alertOn_wordfenceDeactivated" => array('value' => true, 'autoload' => self::AUTOLOAD),
-			"liveTrafficEnabled" => array('value' => true, 'autoload' => self::AUTOLOAD),
+			"liveTrafficEnabled" => array('value' => false, 'autoload' => self::AUTOLOAD),
 			"advancedCommentScanning" => array('value' => true, 'autoload' => self::AUTOLOAD),
 			"checkSpamIP" => array('value' => true, 'autoload' => self::AUTOLOAD),
 			"spamvertizeCheck" => array('value' => true, 'autoload' => self::AUTOLOAD),
@@ -184,6 +183,7 @@ class wfConfig {
 			'cbl_bypassViewURL' => array('value' => '', 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_STRING)),
 			'loginSec_enableSeparateTwoFactor' => array('value' => false, 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_BOOL)),
 			'blockCustomText' => array('value' => '', 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_STRING)),
+			'alertOn_severityLevel' => array('value' => wfIssues::SEVERITY_LOW, 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_INT)),
 		),
 		//Set as default only, not included automatically in the settings import/export or options page saving
 		'defaultsOnly' => array(
@@ -217,9 +217,18 @@ class wfConfig {
 			'touppPromptNeeded' => array('value' => false, 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_BOOL)),
 			'touppBypassNextCheck' => array('value' => false, 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_BOOL)),
 			'autoUpdateAttempts' => array('value' => 0, 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_INT)),
+			'lastPermissionsTemplateCheck' => array('value' => 0, 'autoload' => self::AUTOLOAD, 'validation' => array('type' => self::TYPE_INT)),
+			'previousWflogsFileList' => array('value' => '[]', 'autoload' => self::DONT_AUTOLOAD, 'validation' => array('type' => self::TYPE_STRING)),
+			'diagnosticsWflogsRemovalHistory' => array('value' => '[]', 'autoload' => self::DONT_AUTOLOAD, 'validation' => array('type' => self::TYPE_STRING)),
 		),
 	);
 	public static $serializedOptions = array('lastAdminLogin', 'scanSched', 'emailedIssuesList', 'wf_summaryItems', 'adminUserList', 'twoFactorUsers', 'alertFreqTrack', 'wfStatusStartMsgs', 'vulnerabilities_plugin', 'vulnerabilities_theme', 'dashboardData', 'malwarePrefixes', 'coreHashes', 'noc1ScanSchedule', 'allScansScheduled', 'disclosureStates', 'scanStageStatuses', 'adminNoticeQueue');
+	// Configuration keypairs that can be set from Central.
+	private static $wfCentralInternalConfig = array(
+		'wordfenceCentralUserSiteAuthGrant',
+		'wordfenceCentralConnected',
+	);
+
 	public static function setDefaults() {
 		foreach (self::$defaultConfig['checkboxes'] as $key => $config) {
 			$val = $config['value'];
@@ -843,13 +852,10 @@ class wfConfig {
 		return $emails;
 	}
 	public static function getAlertLevel(){
-		if(self::get('alertOn_warnings')){
-			return 2;
-		} else if(self::get('alertOn_critical')){
-			return 1;
-		} else {
-			return 0;
+		if (self::get('alertOn_scanIssues')) {
+			return self::get('alertOn_severityLevel', 0);
 		}
+		return 0;
 	}
 	public static function liveTrafficEnabled(&$overriden = null){
 		$enabled = self::get('liveTrafficEnabled');
@@ -1624,7 +1630,11 @@ Options -ExecCGI
 				else if (in_array($key, self::$serializedOptions)) {
 					wfConfig::set_ser($key, $value);
 				}
+				else if (in_array($key, self::$wfCentralInternalConfig)) {
+					wfConfig::set($key, $value);
+				}
 				else if (WFWAF_DEBUG) {
+					//TODO: remove me when done with QA
 					error_log("*** DEBUG: Config option '{$key}' missing save handler.");
 				}
 			}
@@ -1705,7 +1715,10 @@ Options -ExecCGI
 							wfScanner::shared()->scheduleScans();
 						}
 					}
-					
+					if (isset($keyData['showWfCentralUI'])) {
+						wfConfig::set('showWfCentralUI', (int) $keyData['showWfCentralUI']);
+					}
+
 					wfConfig::set('keyType', $keyType);
 				}
 				catch (Exception $e){
@@ -1715,6 +1728,7 @@ Options -ExecCGI
 		}
 		
 		wfNotification::reconcileNotificationsWithOptions();
+		wfCentral::requestConfigurationSync();
 	}
 	
 	public static function restoreDefaults($section) {

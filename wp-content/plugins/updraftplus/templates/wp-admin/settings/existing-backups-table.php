@@ -22,12 +22,9 @@ $image_folder_url = UPDRAFTPLUS_URL.'/images/icons/';
 	<tbody>
 		<?php
 
-		// Reverse date sort - i.e. most recent first
-		krsort($backup_history);
-
 		foreach ($backup_history as $key => $backup) {
 
-			$remote_sent = (!empty($backup['service']) && ((is_array($backup['service']) && in_array('remotesend', $backup['service'])) || 'remotesend' === $backup['service'])) ? true : false;
+			$remote_sent = !empty($backup['service']) && ((is_array($backup['service']) && in_array('remotesend', $backup['service'])) || 'remotesend' === $backup['service']);
 
 			// https://core.trac.wordpress.org/ticket/25331 explains why the following line is wrong
 			// $pretty_date = date_i18n('Y-m-d G:i',$key);
@@ -39,13 +36,14 @@ $image_folder_url = UPDRAFTPLUS_URL.'/images/icons/';
 			$entities = '';
 
 			$nonce = $backup['nonce'];
-			$rawbackup = $updraftplus_admin->raw_backup_info($backup_history, $key, $nonce);
 
-			$jobdata = $updraftplus->jobdata_getarray($nonce);
+			$jobdata = isset($backup['jobdata']) ? $backup['jobdata'] : $updraftplus->jobdata_getarray($nonce);
+
+			$rawbackup = $updraftplus_admin->raw_backup_info($backup_history, $key, $nonce, $jobdata);
 
 			$delete_button = $updraftplus_admin->delete_button($key, $nonce, $backup);
 
-			$upload_button = $updraftplus_admin->upload_button($key, $nonce, $backup);
+			$upload_button = $updraftplus_admin->upload_button($key, $nonce, $backup, $jobdata);
 
 			$date_label = $updraftplus_admin->date_label($pretty_date, $key, $backup, $jobdata, $nonce);
 
@@ -156,5 +154,9 @@ $image_folder_url = UPDRAFTPLUS_URL.'/images/icons/';
 	<div class="updraft-viewlogdiv"><button type="button" class="button js--select-all-backups" href="#"><?php _e('Select all', 'updraftplus');?></button></div>
 	<div class="updraft-viewlogdiv"><button type="button" class="button js--deselect-all-backups" href="#"><?php _e('Deselect', 'updraftplus');?></button></div>
 	<small class="ud_massactions-tip"><?php _e('Use ctrl / cmd + press to select several items', 'updraftplus'); ?></small>
+</div>
+<div id="updraft-delete-waitwarning" class="updraft-hidden" style="display:none;">
+	<span class="spinner"></span> <em><?php _e('Deleting...', 'updraftplus');?> <span class="updraft-deleting-remote"><?php _e('Please allow time for the communications with the remote storage to complete.', 'updraftplus');?><span></em>
+	<p id="updraft-deleted-files-total"></p>
 </div>
 <?php endif;

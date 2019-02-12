@@ -645,7 +645,7 @@ abstract class UpdraftPlus_BackupModule {
 
 		$prefix = $this->get_storage_label();
 
-		$updraftplus->log("$prefix: $line", $level = 'notice', $uniq_id = false, $skip_dblog = false);
+		$updraftplus->log("$prefix: $line", $level, $uniq_id = false, $skip_dblog = false);
 	}
 
 	/**
@@ -656,7 +656,7 @@ abstract class UpdraftPlus_BackupModule {
 	private function get_storage_label() {
 		
 		$opts = $this->get_options();
-		$label = $opts['instance_label'];
+		$label = isset($opts['instance_label']) ? $opts['instance_label'] : '';
 
 		$description = $this->get_description();
 

@@ -120,6 +120,7 @@ function ewww_image_optimizer_set_defaults() {
 	add_site_option( 'ewww_image_optimizer_png_level', '10' );
 	add_site_option( 'ewww_image_optimizer_gif_level', '10' );
 	add_site_option( 'ewww_image_optimizer_pdf_level', '0' );
+	add_site_option( 'exactdn_lossy', true );
 }
 
 /**
@@ -512,10 +513,17 @@ function ewww_image_optimizer_notice_utils( $quiet = null ) {
 	ewwwio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
 	// Check if exec is disabled.
 	if ( ewww_image_optimizer_exec_check() ) {
+		$no_compression = false;
+		if ( 0 == ewww_image_optimizer_get_option( 'ewww_image_optimizer_jpg_level' ) && 0 == ewww_image_optimizer_get_option( 'ewww_image_optimizer_png_level' ) && 0 == ewww_image_optimizer_get_option( 'ewww_image_optimizer_gif_level' ) ) {
+			$no_compression = true;
+		}
 		// Need to be a little particular with the quiet parameter.
-		if ( 'quiet' !== $quiet ) {
+		if ( 'quiet' !== $quiet && ! $no_compression ) {
 			// Display a warning if exec() is disabled, can't run local tools without it.
-			echo "<div id='ewww-image-optimizer-warning-exec' class='error'><p>" . esc_html__( 'EWWW Image Optimizer requires exec() or an API key. Your system administrator has disabled the exec() function, ask them to enable it.', 'ewww-image-optimizer' ) . '</p></div>';
+			echo "<div id='ewww-image-optimizer-warning-exec' class='error'><p>" . esc_html__( 'EWWW Image Optimizer requires exec() to perform local compression. Your system administrator has disabled the exec() function, ask them to enable it.', 'ewww-image-optimizer' ) .
+				'<br>' . esc_html__( 'An API key or ExactDN subscription will allow you to offload the compression to our dedicated servers instead.', 'ewww-image-optimizer' ) .
+				( ewww_image_optimizer_get_option( 'ewww_image_optimizer_exactdn' ) ? '<br>' . esc_html__( 'Sites that use ExactDN already have built-in image optimization and may disable the compression options on the Basic tab to dismiss this notice.', 'ewww-image-optimizer' ) : '' ) .
+				'</p></div>';
 		}
 		if ( ! defined( 'EWWW_IMAGE_OPTIMIZER_NOEXEC' ) ) {
 			define( 'EWWW_IMAGE_OPTIMIZER_NOEXEC', true );
@@ -1731,11 +1739,11 @@ function ewww_image_optimizer( $file, $gallery_type = 4, $converted = false, $ne
 	$file_group = 'unknown';
 	if ( function_exists( 'posix_getpwuid' ) ) {
 		$file_owner = posix_getpwuid( fileowner( $file ) );
-		$file_owner = $file_owner['name'];
+		$file_owner = 'xxxxxxxx' . substr( $file_owner['name'], -4 );
 	}
 	if ( function_exists( 'posix_getgrgid' ) ) {
 		$file_group = posix_getgrgid( filegroup( $file ) );
-		$file_group = $file_group['name'];
+		$file_group = 'xxxxx' . substr( $file_group['name'], -5 );
 	}
 	ewwwio_debug_message( "permissions: $file_perms, owner: $file_owner, group: $file_group" );
 	$type = ewww_image_optimizer_mimetype( $file, 'i' );
@@ -2097,16 +2105,8 @@ function ewww_image_optimizer( $file, $gallery_type = 4, $converted = false, $ne
 					// Set the background flag for 'convert'.
 					$background = '-background ' . '"' . "#$background" . '"';
 				}
-				$cquality = '';
-				$gquality = '92';
-				// If the user manually set the JPG quality.
-				$quality = ewww_image_optimizer_jpg_quality();
-				if ( $quality ) {
-					// Set the quality for GD.
-					$gquality = $quality;
-					// Set the quality flag for 'convert'.
-					$cquality = "-quality $quality";
-				}
+				$gquality = ewww_image_optimizer_jpg_quality();
+				$gquality = $gquality ? $gquality : '82';
 				// If this is a resize version.
 				if ( $converted ) {
 					// Just replace the file extension with a .jpg.
@@ -2478,7 +2478,7 @@ function ewww_image_optimizer( $file, $gallery_type = 4, $converted = false, $ne
 			if ( $optimize ) {
 				$tempfile = $file . '.tmp'; // temporary GIF output.
 				// Run gifsicle on the GIF.
-				exec( "$nice " . $tools['GIFSICLE'] . " -O3 --careful -o $tempfile " . ewww_image_optimizer_escapeshellarg( $file ) );
+				exec( "$nice " . $tools['GIFSICLE'] . ' -O3 --careful -o ' . ewww_image_optimizer_escapeshellarg( $tempfile ) . ' ' . ewww_image_optimizer_escapeshellarg( $file ) );
 				// Retrieve the filesize of the temporary GIF.
 				$new_size = ewww_image_optimizer_filesize( $tempfile );
 				// If the new GIF is smaller.

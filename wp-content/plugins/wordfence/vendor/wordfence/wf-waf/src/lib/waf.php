@@ -726,7 +726,7 @@ if (!defined('WFWAF_VERSION')) {
 %s?>
 PHP
 				, $this->buildRuleSet($rules)), 'rules');
-			if (!empty($ruleString) && !WFWAF_DEBUG) {
+			if (!empty($ruleString) && WFWAF_DEBUG && !file_exists($this->getStorageEngine()->getRulesDSLCacheFile())) {
 				wfWAFStorageFile::atomicFilePutContents($this->getStorageEngine()->getRulesDSLCacheFile(), $ruleString, 'rules');
 			}
 
@@ -1243,7 +1243,7 @@ HTML
 		) {
 			foreach ($this->whitelistedParams[$paramKey] as $urlRegex) {
 				if (is_array($urlRegex)) {
-					if (!in_array($ruleID, $urlRegex['rules'])) {
+					if (isset($urlRegex['rules']) && is_array($urlRegex['rules']) && !in_array($ruleID, $urlRegex['rules'])) {
 						continue;
 					}
 					if (isset($urlRegex['conditional']) && !$urlRegex['conditional']->evaluate()) {
@@ -1366,6 +1366,14 @@ HTML
 	public function uninstall() {
 		@unlink($this->getCompiledRulesFile());
 		$this->getStorageEngine()->uninstall();
+	}
+	
+	public function fileList() {
+		$fileList = array($this->getCompiledRulesFile());
+		if (method_exists($this->getStorageEngine(), 'fileList')) {
+			$fileList = array_merge($fileList, $this->getStorageEngine()->fileList());
+		}
+		return $fileList;
 	}
 
 	/**

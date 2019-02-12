@@ -214,8 +214,9 @@ class UpdraftPlus_WPAdmin_Commands extends UpdraftPlus_Commands {
 				$incremental_sets = array_keys($backups[$timestamp]['incremental_sets']);
 				// Check if there are more than one timestamp in the incremental set
 				if (1 < count($incremental_sets)) {
-					$incremental_select_html = '<label>'.__('Select your incremental restore point', 'updraftplus').': </label>';
+					$incremental_select_html = '<label>'.__('This backup set contains incremental backups of your files; please select the time you wish to restore your files to', 'updraftplus').': </label>';
 					$incremental_select_html .= '<select name="updraft_incremental_restore_point" id="updraft_incremental_restore_point">';
+					$incremental_sets = array_reverse($incremental_sets);
 					$first_timestamp = $incremental_sets[0];
 					
 					foreach ($incremental_sets as $timestamp) {
@@ -435,16 +436,17 @@ class UpdraftPlus_WPAdmin_Commands extends UpdraftPlus_Commands {
 				if (!empty($params['path'])) $path = $params['path'];
 
 				if (!empty($params['drop_directory']) && true == $params['drop_directory']) $path = dirname($path);
-
-				$node_array[] = array(
-					'text' => basename($path),
-					'children' => true,
-					'id' => $path,
-					'icon' => 'jstree-folder',
-					'state' => array(
-						'opened' => true
-					)
-				);
+				if (empty($params['skip_root_node'])) {
+					$node_array[] = array(
+						'text' => basename($path),
+						'children' => true,
+						'id' => $path,
+						'icon' => 'jstree-folder',
+						'state' => array(
+							'opened' => true
+						)
+					);
+				}
 		} else {
 			$path = $params['node']['id'];
 		}
@@ -460,14 +462,14 @@ class UpdraftPlus_WPAdmin_Commands extends UpdraftPlus_Commands {
 						$node_array[] = array(
 							'text' => $value,
 							'children' => true,
-							'id' => $path . DIRECTORY_SEPARATOR . $value,
+							'id' => UpdraftPlus_Manipulation_Functions::wp_normalize_path($path . DIRECTORY_SEPARATOR . $value),
 							'icon' => 'jstree-folder'
 						);
 					} else {
 						$node_array[] = array(
 							'text' => $value,
 							'children' => false,
-							'id' => $path . DIRECTORY_SEPARATOR . $value,
+							'id' => UpdraftPlus_Manipulation_Functions::wp_normalize_path($path . DIRECTORY_SEPARATOR . $value),
 							'type' => 'file',
 							'icon' => 'jstree-file'
 						);
@@ -495,14 +497,7 @@ class UpdraftPlus_WPAdmin_Commands extends UpdraftPlus_Commands {
 
 		$node_array = array();
 
-		include_once(UPDRAFTPLUS_DIR.'/includes/class-zip.php');
-		
-		$zip_object = 'UpdraftPlus_ZipArchive';
-
-		// In tests, PclZip was found to be 25% slower than ZipArchive
-		if (((defined('UPDRAFTPLUS_PREFERPCLZIP') && UPDRAFTPLUS_PREFERPCLZIP == true) || !class_exists('ZipArchive') || !class_exists('UpdraftPlus_ZipArchive') || (!extension_loaded('zip') && !method_exists('ZipArchive', 'AddFile')))) {
-			$zip_object = 'UpdraftPlus_PclZip';
-		}
+		$zip_object = $updraftplus->get_zip_object_name();
 
 		// Retrieve the information from our backup history
 		$backup_history = UpdraftPlus_Backup_History::get_history();
@@ -557,22 +552,18 @@ class UpdraftPlus_WPAdmin_Commands extends UpdraftPlus_Commands {
 			if (true !== $zip_opened) {
 				return array('error' => 'UpdraftPlus: opening zip (' . $fullpath . '): failed to open this zip file (object='.$zip_object.', code: '.$zip_opened.')');
 			} else {
-				if ('UpdraftPlus_PclZip' == $zip_object) {
-					$numfiles = $zip->numAll;
-					if (false === $numfiles) {
-						return array('error' => 'UpdraftPlus: reading zip: '.$zip->last_error);
-					}
-				} else {
-					$numfiles = $zip->numFiles;
-				}
+			
+				$numfiles = $zip->numFiles;
 
+				if (false === $numfiles) return array('error' => 'UpdraftPlus: reading zip: '.$zip->last_error);
+					
 				for ($i=0; $i < $numfiles; $i++) {
 					$si = $zip->statIndex($i);
 
 					// Fix for windows being unable to build jstree due to different directory separators being used
 					$si['name'] = str_replace("/", DIRECTORY_SEPARATOR, $si['name']);
 
-					// if it's a dot then we don't want to append this as it will break the id's and the tree structure
+					// if it's a dot then we don't want to append this as it will break the ids and the tree structure
 					if ('.' == dirname($si['name'])) {
 						$node_id = $parent_name;
 					} else {

@@ -77,7 +77,7 @@ class WPSEO_Sitemaps {
 		$this->cache    = new WPSEO_Sitemaps_Cache();
 
 		if ( ! empty( $_SERVER['SERVER_PROTOCOL'] ) ) {
-			$this->http_protocol = sanitize_text_field( $_SERVER['SERVER_PROTOCOL'] );
+			$this->http_protocol = sanitize_text_field( wp_unslash( $_SERVER['SERVER_PROTOCOL'] ) );
 		}
 	}
 
@@ -112,7 +112,7 @@ class WPSEO_Sitemaps {
 			return;
 		}
 
-		$request_uri = $_SERVER['REQUEST_URI'];
+		$request_uri = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) );
 		$extension   = substr( $request_uri, -4 );
 
 		if ( false !== stripos( $request_uri, 'sitemap' ) && in_array( $extension, array( '.xml', '.xsl' ), true ) ) {
@@ -419,9 +419,15 @@ class WPSEO_Sitemaps {
 	}
 
 	/**
-	 * Make a request for the sitemap index so as to cache it before the arrival of the search engines.
+	 * Makes a request to the sitemap index to cache it before the arrival of the search engines.
+	 *
+	 * @return void
 	 */
 	public function hit_sitemap_index() {
+		if ( ! $this->cache->is_enabled() ) {
+			return;
+		}
+
 		wp_remote_get( WPSEO_Sitemaps_Router::get_base_url( 'sitemap_index.xml' ) );
 	}
 
